@@ -47,13 +47,4 @@ I suggest a model based on an individual's features such as age, physical/family
 Moreover, realizing that the increase in medical expenses is much higher for smokers than for those with each unit increase of BMI from the previous multiple regression model makes it reasonable to assume that the effect of smoking on medical expenses is a lot more. An obese smoker is spending even more on medical than it was for an individual with obesity or is a smoker alone. Because individual is more proned to getting various healthy related issues when s/he is obese and smoking together. So an interaction term of $bmi30*smoker$ is added. One can observe that the newly added terms, age2 and <img src="https://render.githubusercontent.com/render/math?math=bmi30*smokers">, are all significant by p-values, which means that these terms are reasonable to be used in the model. In my model, I used powerTransform and Box-Cox, a family of transformations designed to reduce non-normality of the linear model errors. It turns out that in doing this, it often reduces non-linearity as well. 
 
 
-This Data is a pratical is used in the book Machine Learning with R by Brett Lantz; which is a book that provides an introduction to machine learning using R. All of these datasets are in the public domain but simply needed some cleaning up and recoding to match the format in the book. The following data obtained from Kaggle, explain the cost of a small sample of USA population Medical Insurance Cost based on some attributes :
-
-age: age of primary beneficiary.
-sex: insurance contractor gender, female, male.
-bmi: Body mass index, providing an understanding of body, weights that are relatively high or low relative to height, objective index of body weight <img src="https://render.githubusercontent.com/render/math?math=(kg / m^2)"> . using the ratio of height to weight, ideally 18.5 to 24.9.
-children: Number of children covered by health insurance / Number of dependents.
-smoker: Smoking.
-region: the beneficiary's residential area in the US, northeast, southeast, southwest, northwest.
-charges: Individual medical costs billed by health insurance.
 
