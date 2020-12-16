@@ -160,6 +160,8 @@ loessLine(x,y,col="blue",log.x = FALSE, log.y = FALSE, smoother.args=list())
 ![alt text](images/8.png)
 
 
+### Non-normality
+
 ```{r}
 d<-density((((predict(WLS_linear_model1, ins_testing)-ins_testing$T_charges))))
   
@@ -173,3 +175,49 @@ d=(((predict(WLS_linear_model1, ins_testing)-ins_testing$T_charges)))
 plot(ecdf(d))
 ```
 ![alt text](images/10.png)
+
+
+```{r}
+shapiro.test(d)
+```
+
+![alt text](images/11.png)
+
+
+
+```{r}
+# diagnostic plots
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page
+plot(WLS_linear_model1)
+```
+
+![alt text](images/12.png)
+
+
+### Influential Observations
+```{r}
+# Influence Plot 
+influencePlot(WLS_linear_model1)
+
+```
+
+![alt text](images/14.png)
+
+![alt text](images/15.png)
+
+
+### Non-independence of Errors
+
+```{r}
+# Test for Autocorrelated Errors
+durbinWatsonTest(WLS_linear_model1)
+```
+
+![alt text](images/16.png)
+
+
+```{r,fig.height=8,fig.width=8}
+hist(ins_testing$pred_ins, breaks = 30)
+```
+
+![alt text](images/13.png)
