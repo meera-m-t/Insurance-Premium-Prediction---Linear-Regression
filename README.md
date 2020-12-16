@@ -42,9 +42,134 @@ Moreover, realizing that the increase in medical expenses is much higher for smo
 ## Setup: 
 1. Download [R](https://cran.rstudio.com/)
 2. Download [R Studio](https://www.rstudio.com/products/rstudio/download/)
-3. Cloning a repository 
+ 
 
-```bash
-git clone https://github.com/sameerahTalafha/Insurance-Premium-Prediction---Linear-Regression.git
+```{r}
+set.seed(89)
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(caret)
+library(GGally)
+library(tree)
+library(randomForest)
+library(PerformanceAnalytics)
+library(psych)
+ins=read.csv("insurance.csv")
+ins$age2 <- ins$age^2
+ins$bmi30 <- ifelse(ins$bmi >= 30, 1, 0)
+s_dev=sd(ins$charges)
+mean_val=mean(ins$charges)
+ins$bmi = scale(ins$bmi)
+ins$charges=(ins$charges*s_dev)+mean_val
+ins$smoker_num=ifelse(ins$smoker=="yes",1,0)
+ins$child_cat = as.factor(ins$children)
+head(ins)
+
 ```
-4. open the file 'model.Rmd' in R Studio
+
+![alt text](images/1.png)
+
+### Transform the Response
+
+The powerTransform() function in the car package determines the optimal power at which you should raise the outcome variable (in this case, cycles) prior to including it in a linear regression model. The optimal power is denoted by lambda, so $outcome^lambda$ becomes the transformed outcome variable.
+
+```{r}
+library(car)
+
+(ans <-powerTransform(cbind(charges,age2) ~ 1, data=ins))
+summary(ans)
+```
+
+![alt text](images/2.png)
+
+
+```{r}
+ins$T_charges=ins$charges^-0.12
+ins$T_age2=ins$age2^.33
+ins_training=ins[sample(1:1338,0.90*nrow(ins)),]
+ins_testing=ins[sample(1:1338,0.10*nrow(ins)),]
+```
+
+```{r,fig.height=8,fig.width=8}
+hist(ins_testing$T_charges, breaks = 30)
+```
+
+![alt text](images/3.png)
+
+```{r}
+linear_model1=lm(T_charges~sex+bmi+child_cat+smoker_num*bmi30+region+T_age2, data=ins_training)
+wts <- 1/fitted(lm(abs(ins_training$T_charges-ins_training$pred_ins) ~ predict(linear_model1, ins_training)))^2
+WLS_linear_model1 <- lm(T_charges~sex+bmi+child_cat+smoker_num*bmi30+region+T_age2,data=ins_training, weights=wts)
+summary(WLS_linear_model1 )
+```
+![alt text](images/4.png)
+
+```{r}
+#RMSE
+ins_testing$pred_ins=predict(WLS_linear_model1,ins_testing)
+ins_training$pred_ins=predict(WLS_linear_model1,ins_training)
+print("RMSE-Training :")
+print(RMSE(ins_training$T_charges, ins_training$pred_ins))
+print("RMSE-Testing :")
+print(RMSE(ins_testing$T_charges, ins_testing$pred_ins))
+```
+
+![alt text](images/5.png)
+
+```{r}
+#MSE
+print("MSE-Training :")
+print(mean(ins_training$T_charges-ins_training$pred_ins)^2)
+print("MSE-Testing :")
+print(mean(ins_testing$T_charges-ins_testing$pred_ins)^2)
+```
+
+
+![alt text](images/6.png)
+
+
+```{r}
+#Residual standard error for training dataset
+print("RSE-Training :")
+
+sqrt(sum((predict(WLS_linear_model1, ins_training)-ins_training$T_charges)^2)/
+    (nrow(ins_training)-2))
+
+print("RSE-Testing :")
+
+sqrt(sum((predict(WLS_linear_model1, ins_testing)-ins_testing$T_charges)^2)/
+    (nrow(ins_testing)-2))
+
+```
+
+![alt text](images/7.png)
+
+```{r}
+
+y=abs(((predict(WLS_linear_model1, ins_testing)-ins_testing$T_charges)^2)/
+   (nrow(ins_testing)-2))
+x=predict(WLS_linear_model1, ins_testing)
+plot(x, y)
+abline(lm(y~x), col="purple", lty=2)
+loessLine(x,y,col="blue",log.x = FALSE, log.y = FALSE, smoother.args=list())
+
+```
+
+![alt text](images/8.png)
+
+
+```{r}
+d<-density((((predict(WLS_linear_model1, ins_testing)-ins_testing$T_charges))))
+  
+plot(d,main='Residual KDE Plot',xlab='Residual value')
+```
+
+![alt text](images/9.png)
+
+```{r}
+d=(((predict(WLS_linear_model1, ins_testing)-ins_testing$T_charges)))
+plot(ecdf(d))
+```
+![alt text](images/10.png)
