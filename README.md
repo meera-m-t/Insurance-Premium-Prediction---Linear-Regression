@@ -221,3 +221,12 @@ hist(ins_testing$pred_ins, breaks = 30)
 ```
 
 ![alt text](images/13.png)
+
+```{r,fig.width=12, fig.height=8}
+infIndexPlot(WLS_linear_model1,vars=c("Cook", "Studentized", "Bonf", "hat"),
+    id=TRUE, grid=TRUE, main="Diagnostic Plots",col="blue")
+
+```
+
+
+![alt text](images/17.png)
